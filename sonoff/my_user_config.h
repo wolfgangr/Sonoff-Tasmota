@@ -249,6 +249,7 @@
 // -- MQTT - TLS ----------------------------------
   // !!! TLS uses a LOT OF MEMORY so be careful to enable other options at the same time !!!
 #define USE_MQTT_TLS                             // Use TLS for MQTT connection (+53k code, +15k mem)
+//#define USE_MQTT_TLS                             // Use TLS for MQTT connection (+53k code, +15k mem)
 //  #define USE_MQTT_TLS_CA_CERT                   // Use LetsEncrypt Certificate from sonoff_letsencrypt.h - Not supported with core 2.3.0
 
 // -- KNX IP Protocol -----------------------------
@@ -369,6 +370,7 @@
   #define TUYA_DIMMER_ID       0                 // Default dimmer Id
 // #define USE_ARMTRONIX_DIMMERS                    // Add support for Armtronix Dimmers (+1k4 code)
 // #define USE_PS_16_DZ                             // Add support for PS-16-DZ Dimmer
+#define USE_LC_TECH_RELAY                        // Add support for LC Technology relay boards
 //#define USE_AZ7798                               // Add support for AZ-Instrument 7798 CO2 datalogger (+1k6 code)
 
 // Power monitoring sensors -----------------------

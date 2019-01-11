@@ -21,6 +21,8 @@
 #define _SONOFF_VERSION_H_
 
 #define VERSION            0x06040100
+//#define VERSION            0x06040003
+// VerboteneZone/development
 
 #define D_PROGRAMNAME      "Sonoff-Tasmota"
 #define D_AUTHOR           "Theo Arends"
