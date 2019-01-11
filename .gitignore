@@ -12,3 +12,6 @@ build
 
 ## Visual Studio Code specific ######
 .vscode
+firmware.map
+my_diffs
+
