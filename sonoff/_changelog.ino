@@ -1,4 +1,4 @@
-# <<< HEAD
+// <<< HEAD
 /* 6.4.1 20181223
  * Change RAM usage BMP/BME I2C sensors
  * Change FallbackTopic from cmnd/<mqttclient>/ to cmnd/<mqttclient>_fb/ to discriminate from Topic (#1528)
@@ -12,7 +12,7 @@
  * Add support for AZ-Instrument 7798 CO2 meter/datalogger (#4672)
  * Add define WIFI_SOFT_AP_CHANNEL in my_user_config.h to set Soft Access Point Channel number between 1 and 13 as used by Wifi Manager web GUI (#4673)
  * Add define USE_MQTT_TLS_CA_CERT for checking MQTT TLS against root ca using Let's Encrypt cert from sonoff_letsencrypt.h - not supported with core 2.3.0 (#4703)
-# ===
+// ===
 /* 6.4.0.3 20181222
  * Change Hass discovery to short MQTT messages as used by Hass 0.81 and up (#4711)
  * Change FallbackTopic detection (#4706)
@@ -28,7 +28,7 @@
  * Add support for AZ-Instrument 7798 CO2 meter/datalogger (#4672)
  * Change RAM usage BMP/BME I2C sensors
  * Fix wifi strongest signal detection (#4704)
-# >>> VerboteneZone/development
+// >>> VerboteneZone/development
  *
  * 6.4.0 20181217
  * Change GUI Configure Module by using AJAX for data fetch to cut page size (and memory use) by 40%
