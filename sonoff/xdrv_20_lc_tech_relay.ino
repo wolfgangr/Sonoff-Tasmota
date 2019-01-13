@@ -46,13 +46,19 @@ uint8_t next_update =0;
 
 boolean LCTSetRelay(void)
 {
+  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetRelay entry"));
+  AddLog(LOG_LEVEL_DEBUG_MORE);  
   power_t rpower = XdrvMailbox.index;
 
   return LCTSetStates(rpower);
+  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetRelay exit"));
+  AddLog(LOG_LEVEL_DEBUG_MORE);
 }
 
 boolean LCTSetStates(power_t new_state)
 {
+  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetStates entry - new_state %04x"), new_state);
+  AddLog(LOG_LEVEL_DEBUG_MORE);
   // find out which state may have changed
   power_t changed = target_state xor new_state;
   target_state = new_state;
@@ -65,12 +71,17 @@ boolean LCTSetStates(power_t new_state)
     changed >>= 1 ;
   }
   // may call loop handler to give chance for immediate update
+  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetStates exit"));
+  AddLog(LOG_LEVEL_DEBUG_MORE);
   return true;
 }
 
 // to be called as often as we can afford, e.g. once every main loop cycle
 boolean LCTLoopHandler(void)
 {
+  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTLoopHandler entry"));
+  AddLog(LOG_LEVEL_DEBUG_MORE);
+
   static unsigned long nextcall = 0; 
 
     if (TimeReached(nextcall)) {
@@ -80,7 +91,11 @@ boolean LCTLoopHandler(void)
         next_update = 0;
       }
     }
+  
+  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTLoopHandler exit"));
+  AddLog(LOG_LEVEL_DEBUG_MORE);
   return true;
+  
 }
 
 
@@ -202,6 +217,9 @@ boolean Xdrv20(byte function)
         break;
       case FUNC_SET_DEVICE_POWER:
         result = LCTSetRelay();
+        break;
+      case FUNC_LOOP:
+        result = LCTLoopHandler();
         break;
     }
   }
