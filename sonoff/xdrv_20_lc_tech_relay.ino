@@ -85,13 +85,30 @@ boolean LCTLoopHandler(void)
   // snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTLoopHandler entry"));
   // AddLog(LOG_LEVEL_DEBUG_MORE);
 
-  static unsigned long nextcall = 0; 
+  static unsigned long lastcall = 0 ; 
+  unsigned long delay;
 
-    if (TimeReached(nextcall)) {
+    if (fast_update_count > 0) {
+      delay = LCT_SWITCH_DELAY;
+      fast_update_count-- ;
+    } else {
+        if (LCT_HOLD_DELAY == 0) {
+          return true;
+          // ------------------------
+        }      
+      delay = LCT_HOLD_DELAY ;
+    }
+
+    // https://www.norwegiancreations.com/2018/10/arduino-tutorial-avoiding-the-overflow-issue-when-using-millis-and-micros/
+    if ( (unsigned long)( millis() - lastcall > delay )) {
 
       // really do what's to be done
       LCTRelayBoardSwitch(next_update, (boolean)(target_state >> next_update) & 1) ;
 
+      lastcall = millis();
+    
+    // can't use preset timer since condition may change!
+    /*
       if (fast_update_count > 0) {
         // fast command sequence after toggle
         SetNextTimeInterval(nextcall, LCT_SWITCH_DELAY); 
@@ -103,10 +120,10 @@ boolean LCTLoopHandler(void)
         // slow commands sequence for redundancy
         SetNextTimeInterval(nextcall, LCT_HOLD_DELAY);  
       }
-    
+     */
       // LCTRelayBoardSwitch(next_update, (boolean)(target_state >> next_update) & 1) ;
-      
-      if ( next_update++ >= LCTNumDevs ) {
+      next_update++;
+      if ( next_update >= LCTNumDevs ) {
         next_update = 0;
       }
     }
@@ -162,7 +179,9 @@ boolean LCTRelayBoardSwitch(uint8_t id, boolean nc)
   Serial.write(LCTByteEnd);
   Serial.write(LCTByteReset);   
   
-  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: Sent new serial state to relay %d (state: %d): 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x"), id, nc ? 1 : 0, LCTByteBegin, LCTByteDevID, LCTByteDevState, LCTByteEnd, LCTByteReset);
+  snprintf_P(log_data, sizeof(log_data), 
+      PSTR( "LCT: [%06d] Sent state to relay %d (state: %d): 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x"), 
+      millis(), id, nc ? 1 : 0, LCTByteBegin, LCTByteDevID, LCTByteDevState, LCTByteEnd, LCTByteReset);
  AddLog(LOG_LEVEL_DEBUG);
 
   delay(20);
