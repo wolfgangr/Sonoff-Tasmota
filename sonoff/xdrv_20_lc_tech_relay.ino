@@ -30,7 +30,6 @@
 
 // const uint8_t LCTSeqBase[5]  = { 0xA0, 0x00, 0x00, 0xA0, 0x0A };
 
-
 uint8_t LCTNumDevs = 0;
 uint32_t LCTBaudrate = 0;
 boolean LCTInitialized = false;
@@ -47,23 +46,23 @@ uint8_t fast_update_count =0;
 
 boolean LCTSetRelay(void)
 {
-  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetRelay entry"));
-  AddLog(LOG_LEVEL_DEBUG_MORE);  
+  // snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetRelay entry"));
+  // AddLog(LOG_LEVEL_DEBUG_MORE);  
   power_t rpower = XdrvMailbox.index;
 
   return LCTSetStates(rpower);
-  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetRelay exit"));
-  AddLog(LOG_LEVEL_DEBUG_MORE);
+  // snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetRelay exit"));
+  // AddLog(LOG_LEVEL_DEBUG_MORE);
 }
 
 boolean LCTSetStates(power_t new_state)
 {
-  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetStates entry - new_state %04x"), new_state);
-  AddLog(LOG_LEVEL_DEBUG_MORE);
+  // snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetStates entry - new_state %04x"), new_state);
+  // AddLog(LOG_LEVEL_DEBUG_MORE);
   // find out which state may have changed
   power_t changed = target_state xor new_state;
   if (changed ) {
-    fast_update_count = LCTNumDevs * 5 ; // send every command twice before falling to slow mode
+    fast_update_count = LCTNumDevs * 2 ; // send every command twice before falling to slow mode
   }
   target_state = new_state;
   
@@ -75,20 +74,24 @@ boolean LCTSetStates(power_t new_state)
     changed >>= 1 ;
   }
   // may call loop handler to give chance for immediate update
-  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetStates exit"));
-  AddLog(LOG_LEVEL_DEBUG_MORE);
+  // snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetStates exit"));
+  // AddLog(LOG_LEVEL_DEBUG_MORE);
   return true;
 }
 
 // to be called as often as we can afford, e.g. once every main loop cycle
 boolean LCTLoopHandler(void)
 {
-  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTLoopHandler entry"));
-  AddLog(LOG_LEVEL_DEBUG_MORE);
+  // snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTLoopHandler entry"));
+  // AddLog(LOG_LEVEL_DEBUG_MORE);
 
   static unsigned long nextcall = 0; 
 
     if (TimeReached(nextcall)) {
+
+      // really do what's to be done
+      LCTRelayBoardSwitch(next_update, (boolean)(target_state >> next_update) & 1) ;
+
       if (fast_update_count > 0) {
         // fast command sequence after toggle
         SetNextTimeInterval(nextcall, LCT_SWITCH_DELAY); 
@@ -101,20 +104,18 @@ boolean LCTLoopHandler(void)
         SetNextTimeInterval(nextcall, LCT_HOLD_DELAY);  
       }
     
-      // really do what's to be done
-      LCTRelayBoardSwitch(next_update, (boolean)(target_state >> next_update) & 1) ;
+      // LCTRelayBoardSwitch(next_update, (boolean)(target_state >> next_update) & 1) ;
       
       if ( next_update++ >= LCTNumDevs ) {
         next_update = 0;
       }
     }
   
-  snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTLoopHandler exit"));
-  AddLog(LOG_LEVEL_DEBUG_MORE);
+  // snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTLoopHandler exit"));
+  // AddLog(LOG_LEVEL_DEBUG_MORE);
   return true;
   
 }
-
 
 /*
 boolean LCTSetStates(power_t rpower)
@@ -235,6 +236,7 @@ boolean Xdrv20(byte function)
       case FUNC_SET_DEVICE_POWER:
         result = LCTSetRelay();
         break;
+      // hook update handling function into main loop
       case FUNC_LOOP:
         result = LCTLoopHandler();
         break;
