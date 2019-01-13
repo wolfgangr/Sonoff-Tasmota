@@ -372,8 +372,9 @@
 // #define USE_PS_16_DZ                             // Add support for PS-16-DZ Dimmer
 #define USE_LC_TECH_RELAY                        // Add support for LC Technology relay boards
   #define LCT_SWITCH_DELAY  40                      // min ms to wait between relay commands when toggled
-  #define LCT_HOLD_DELAY   1000                   // min ms to wait between relay commands when unchanged
-//#define USE_AZ7798                               // Add support for AZ-Instrument 7798 CO2 datalogger (+1k6 code)
+  #define LCT_FAST_REPEAT   5                       // how many times commands are repeated in fast mode
+  #define LCT_HOLD_DELAY   1000                     // min ms to wait between relay commands when unchanged
+  //#define USE_AZ7798                               // Add support for AZ-Instrument 7798 CO2 datalogger (+1k6 code)
 
 // Power monitoring sensors -----------------------
 // #define USE_PZEM004T                             // Add support for PZEM004T Energy monitor (+2k code)
