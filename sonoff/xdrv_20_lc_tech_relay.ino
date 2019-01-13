@@ -38,6 +38,7 @@ boolean LCTInitialized = false;
 // state variables for the nonblocking delay handler
 power_t target_state = 0;
 uint8_t next_update =0;
+uint8_t fast_update_count =0;
 
 
 /*********************************************************************************************\
@@ -61,6 +62,9 @@ boolean LCTSetStates(power_t new_state)
   AddLog(LOG_LEVEL_DEBUG_MORE);
   // find out which state may have changed
   power_t changed = target_state xor new_state;
+  if (changed ) {
+    fast_update_count = LCTNumDevs * 5 ; // send every command twice before falling to slow mode
+  }
   target_state = new_state;
   
   for (byte i = 0; i < LCTNumDevs; i++) {
@@ -85,8 +89,21 @@ boolean LCTLoopHandler(void)
   static unsigned long nextcall = 0; 
 
     if (TimeReached(nextcall)) {
-      SetNextTimeInterval(nextcall, LCT_SWITCH_DELAY);  
+      if (fast_update_count > 0) {
+        // fast command sequence after toggle
+        SetNextTimeInterval(nextcall, LCT_SWITCH_DELAY); 
+        fast_update_count--;
+      } else {
+        if (LCT_HOLD_DELAY == 0) {
+          return true;
+        }
+        // slow commands sequence for redundancy
+        SetNextTimeInterval(nextcall, LCT_HOLD_DELAY);  
+      }
+    
+      // really do what's to be done
       LCTRelayBoardSwitch(next_update, (boolean)(target_state >> next_update) & 1) ;
+      
       if ( next_update++ >= LCTNumDevs ) {
         next_update = 0;
       }
