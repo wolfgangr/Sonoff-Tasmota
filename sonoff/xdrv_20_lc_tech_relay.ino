@@ -29,11 +29,16 @@
 #define XDRV_20                20
 
 // const uint8_t LCTSeqBase[5]  = { 0xA0, 0x00, 0x00, 0xA0, 0x0A };
-const uint8_t LCTSeqBase[5]  = { 0xA0, 0x00, 0x00, 0xA0, 0x00 };
+
 
 uint8_t LCTNumDevs = 0;
 uint32_t LCTBaudrate = 0;
 boolean LCTInitialized = false;
+
+// state variables for the nonblocking delay handler
+power_t target_state = 0;
+uint8_t next_update =0;
+
 
 /*********************************************************************************************\
  * Internal Functions
@@ -46,6 +51,40 @@ boolean LCTSetRelay(void)
   return LCTSetStates(rpower);
 }
 
+boolean LCTSetStates(power_t new_state)
+{
+  // find out which state may have changed
+  power_t changed = target_state xor new_state;
+  target_state = new_state;
+  
+  for (byte i = 0; i < LCTNumDevs; i++) {
+    if (changed & 1) {
+      next_update = i;      // changed switch is the preferred next update
+      // break ;;  // precedence if more than 1 state changed
+    }
+    changed >>= 1 ;
+  }
+  // may call loop handler to give chance for immediate update
+  return true;
+}
+
+// to be called as often as we can afford, e.g. once every main loop cycle
+boolean LCTLoopHandler(void)
+{
+  static unsigned long nextcall = 0; 
+
+    if (TimeReached(nextcall)) {
+      SetNextTimeInterval(nextcall, LCT_SWITCH_DELAY);  
+      LCTRelayBoardSwitch(next_update, (boolean)(target_state >> next_update) & 1) ;
+      if ( next_update++ >= LCTNumDevs ) {
+        next_update = 0;
+      }
+    }
+  return true;
+}
+
+
+/*
 boolean LCTSetStates(power_t rpower)
 {
   uint8_t state;
@@ -64,6 +103,7 @@ boolean LCTSetStates(power_t rpower)
 
   return true;
 }
+*/
 
 boolean LCTRelayBoardSwitch(uint8_t id, boolean nc)
 {
@@ -75,34 +115,20 @@ boolean LCTRelayBoardSwitch(uint8_t id, boolean nc)
   SetSeriallog(LOG_LEVEL_NONE); // Important, if someone changes LOG_LEVEL to something nastier than NONE.
   SetSerialBaudrate(LCTBaudrate);
 
-  uint8_t LCTByteBegin    = LCTSeqBase[0];
-  uint8_t LCTByteDevID    = LCTSeqBase[1] + ((id & 0xff) + 1);
-  uint8_t LCTByteDevState = LCTSeqBase[2] + (uint8_t)nc;
-  uint8_t LCTByteEnd      = LCTSeqBase[3] + ((id & 0xff) + 3) - ((uint8_t)nc ? 1 : 2);
-  uint8_t LCTByteReset    = LCTSeqBase[4];
+  // const uint8_t LCTSeqBase[5]  = { 0xA0, 0x00, 0x00, 0xA0, 0x00 };
+  uint8_t LCTByteBegin    = 0xA0 ;
+  uint8_t LCTByteDevID    = (id & 0xff) + 1 ;
+  uint8_t LCTByteDevState = (uint8_t)nc;
+  uint8_t LCTByteEnd      = 0xA0 + ((id & 0xff) + 3) - ((uint8_t)nc ? 1 : 2);
+  uint8_t LCTByteReset    = 0x0A ;
 
-/*
-  char buffer[5] = {
-  // char buffer[4] = {
-    LCTByteBegin,
-    LCTByteDevID,
-    LCTByteDevState,
-    LCTByteEnd,
-    LCTByteReset
-  };
-  
-  SerialSendRaw(buffer);
- */
 
-  // Serial.write(0x00);
-  Serial.write(0xa0);
+  Serial.write(LCTByteBegin)   ;
   Serial.write(LCTByteDevID);
   Serial.write(LCTByteDevState);
   Serial.write(LCTByteEnd);
-  // Serial.write();
-  Serial.write(0x0a);
-  // Serial.write(0x00);
-
+  Serial.write(LCTByteReset);   
+  
   snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: Sent new serial state to relay %d (state: %d): 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x"), id, nc ? 1 : 0, LCTByteBegin, LCTByteDevID, LCTByteDevState, LCTByteEnd, LCTByteReset);
  AddLog(LOG_LEVEL_DEBUG);
 
