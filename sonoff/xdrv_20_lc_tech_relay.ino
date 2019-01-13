@@ -28,7 +28,8 @@
 
 #define XDRV_20                20
 
-const uint8_t LCTSeqBase[5]  = { 0xA0, 0x00, 0x00, 0xA0, 0x0A };
+// const uint8_t LCTSeqBase[5]  = { 0xA0, 0x00, 0x00, 0xA0, 0x0A };
+const uint8_t LCTSeqBase[5]  = { 0xA0, 0x00, 0x00, 0xA0, 0x00 };
 
 uint8_t LCTNumDevs = 0;
 uint32_t LCTBaudrate = 0;
@@ -82,13 +83,14 @@ boolean LCTRelayBoardSwitch(uint8_t id, boolean nc)
 
 /*
   char buffer[5] = {
+  // char buffer[4] = {
     LCTByteBegin,
     LCTByteDevID,
     LCTByteDevState,
     LCTByteEnd,
     LCTByteReset
   };
-
+  
   SerialSendRaw(buffer);
  */
 
@@ -102,7 +104,7 @@ boolean LCTRelayBoardSwitch(uint8_t id, boolean nc)
   // Serial.write(0x00);
 
   snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: Sent new serial state to relay %d (state: %d): 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x"), id, nc ? 1 : 0, LCTByteBegin, LCTByteDevID, LCTByteDevState, LCTByteEnd, LCTByteReset);
-  AddLog(LOG_LEVEL_DEBUG);
+ AddLog(LOG_LEVEL_DEBUG);
 
   delay(20);
 
