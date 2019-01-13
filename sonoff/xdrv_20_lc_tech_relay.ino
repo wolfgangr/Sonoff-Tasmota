@@ -62,18 +62,17 @@ boolean LCTSetStates(power_t new_state)
   // find out which state may have changed
   power_t changed = target_state xor new_state;
   if (changed ) {
-    fast_update_count = LCTNumDevs * LCT_FAST_REPEAT ; // send every command twice before falling to slow mode
+    fast_update_count = LCTNumDevs * LCT_FAST_REPEAT ; // repeat every command before falling to slow mode
   }
   target_state = new_state;
   
   for (byte i = 0; i < LCTNumDevs; i++) {
     if (changed & 1) {
-      next_update = i;      // changed switch is the preferred next update
+      next_update = i;      // toggled relay is the preferred next update
       // break ;;  // precedence if more than 1 state changed
     }
     changed >>= 1 ;
   }
-  // may call loop handler to give chance for immediate update
   // snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: LCTSetStates exit"));
   // AddLog(LOG_LEVEL_DEBUG_MORE);
   return true;
@@ -99,8 +98,8 @@ boolean LCTLoopHandler(void)
       delay = LCT_HOLD_DELAY ;
     }
 
-    // https://www.norwegiancreations.com/2018/10/arduino-tutorial-avoiding-the-overflow-issue-when-using-millis-and-micros/
-    if ( (unsigned long)( millis() - lastcall > delay )) {
+    // overflow proof ... so I hope...
+    if ( (unsigned long)( millis() - lastcall) > delay ) {
 
       // really do what's to be done
       LCTRelayBoardSwitch(next_update, (boolean)(target_state >> next_update) & 1) ;
@@ -111,7 +110,7 @@ boolean LCTLoopHandler(void)
       if ( next_update >= LCTNumDevs ) {
         next_update = 0;
       }
-      
+
       if (fast_update_count > 0) { 
         fast_update_count-- ; 
       }
