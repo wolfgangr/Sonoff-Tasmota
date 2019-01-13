@@ -80,6 +80,7 @@ boolean LCTRelayBoardSwitch(uint8_t id, boolean nc)
   uint8_t LCTByteEnd      = LCTSeqBase[3] + ((id & 0xff) + 3) - ((uint8_t)nc ? 1 : 2);
   uint8_t LCTByteReset    = LCTSeqBase[4];
 
+/*
   char buffer[5] = {
     LCTByteBegin,
     LCTByteDevID,
@@ -89,9 +90,21 @@ boolean LCTRelayBoardSwitch(uint8_t id, boolean nc)
   };
 
   SerialSendRaw(buffer);
+ */
+
+  // Serial.write(0x00);
+  Serial.write(0xa0);
+  Serial.write(LCTByteDevID);
+  Serial.write(LCTByteDevState);
+  Serial.write(LCTByteEnd);
+  // Serial.write();
+  Serial.write(0x0a);
+  // Serial.write(0x00);
 
   snprintf_P(log_data, sizeof(log_data), PSTR( "LCT: Sent new serial state to relay %d (state: %d): 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x"), id, nc ? 1 : 0, LCTByteBegin, LCTByteDevID, LCTByteDevState, LCTByteEnd, LCTByteReset);
   AddLog(LOG_LEVEL_DEBUG);
+
+  delay(20);
 
   return true;
 }

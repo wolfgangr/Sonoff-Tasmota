@@ -36,7 +36,7 @@
  * Users are advised to use the user_config_override.h file for most changes.
 \*********************************************************************************************/
 
-//#define USE_CONFIG_OVERRIDE                      // Uncomment to use user_config_override.h file. See README.md
+#define USE_CONFIG_OVERRIDE                      // Uncomment to use user_config_override.h file. See README.md
 
 /*********************************************************************************************\
  * SECTION 1
@@ -368,7 +368,7 @@
 #define USE_TUYA_DIMMER                          // Add support for Tuya Serial Dimmer
   #define TUYA_DIMMER_ID       0                 // Default dimmer Id
 #define USE_ARMTRONIX_DIMMERS                    // Add support for Armtronix Dimmers (+1k4 code)
-//#define USE_LC_TECH_RELAY                        // Add support for LC Technology relay boards
+#define USE_LC_TECH_RELAY                        // Add support for LC Technology relay boards
 #define USE_PS_16_DZ                             // Add support for PS-16-DZ Dimmer
 //#define USE_AZ7798                               // Add support for AZ-Instrument 7798 CO2 datalogger (+1k6 code)
 
@@ -432,7 +432,7 @@
 \*********************************************************************************************/
 
 #if defined(USE_MQTT_TLS) && defined(USE_WEBSERVER)
-  #error "Select either USE_MQTT_TLS or USE_WEBSERVER as there is just not enough memory to play with"
+  // #error "Select either USE_MQTT_TLS or USE_WEBSERVER as there is just not enough memory to play with"
 #endif
 
 #endif  // _MY_USER_CONFIG_H_
